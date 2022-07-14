@@ -68,7 +68,7 @@ function App() {
 
     return (
         <div className="App">
-            <h1>Zubi Job Manager</h1>
+            <h1>Zubi's Job Manager</h1>
             {userIsLoggedIn() ? (
                 <>
                     <p>There are {jobSources.length} job sources:</p>
