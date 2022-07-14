@@ -12,7 +12,7 @@ function App() {
     const [message, setMessage] = useState("");
 
     const userIsLoggedIn = () => {
-        return Object.keys(currentUser).length > 0;
+        return currentUser.username !== 'anonymousUser';
     };
 
     const getJobSources = () => {
@@ -37,10 +37,26 @@ function App() {
                 setCurrentUser(data.user);
                 getJobSources();
             } else {
-                setCurrentUser({});
+                const response = await fetch(backend_base_url + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'anonymousUser',
+                        password: 'anonymous123',
+                    }),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    getJobSources();
+                    setCurrentUser(data.user);
+                    localStorage.setItem('token', data.token);
+                } else {
+                    setMessage('bad login');
+                }
             }
         })();
     }, []);
+         
 
     const handleLoginButton = async (e) => {
         e.preventDefault();
@@ -63,12 +79,20 @@ function App() {
     };
     const handleLogoutButton = () => {
         localStorage.setItem('token', '');
-        setCurrentUser({});
+        setCurrentUser({username: 'anonymousUser'});
     };
 
     return (
         <div className="App">
             <h1>Zubi's Job Manager</h1>
+            <div className="loggedInInfo">
+    {userIsLoggedIn() && (
+        <div>
+            Logged in: {currentUser.firstName}{' '}
+            {currentUser.lastName}
+        </div>
+            )}
+            </div>
             {userIsLoggedIn() ? (
                 <>
                     <p>There are {jobSources.length} job sources:</p>
